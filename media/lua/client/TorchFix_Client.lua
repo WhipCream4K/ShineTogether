@@ -3,7 +3,7 @@ require "TorchFix_Main"
 TF_ClientCommands = {}
 TF_ClientCommands.TorchFixModule = {}
 
-TF_ClientCommands.TorchFixModule.UpdateAttachedItems = function (args)
+TF_ClientCommands.TorchFixModule.SendDefferedUpdate = function (args)
    
     if args == nil then return end
 

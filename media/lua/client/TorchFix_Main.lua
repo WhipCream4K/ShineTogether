@@ -75,7 +75,7 @@ TorchFix.stepUpdate = function()
     -- and mainly I don't want to loop through all the attached items every time the stepUpdate is called
 
     local attachedItems = player:getAttachedItems()
-    local modData = TorchFix.attachedLight:getCopy()
+    local modData = TorchFix.attachedLight:getRef()
 
     local keysToRemove = {}
     local isLightChanged = false
@@ -101,11 +101,8 @@ TorchFix.stepUpdate = function()
         for _, key in ipairs(keysToRemove) do
             modData[key] = nil
         end
-
-        TorchFix.attachedLight:set(modData)
     end
 
-    -- TorchFix.attachedLight:set(modData)
 end
 
 TorchFix.syncRemoteTorches = function(player, attachedIndex, battery, isActivated)
@@ -120,7 +117,7 @@ TorchFix.syncRemoteTorches = function(player, attachedIndex, battery, isActivate
     sendClientCommand(player, TorchFixNetwork.ModuleName, TorchFixNetwork.Commands.SetActivate, dataTable)
 
     -- sync remote torces is called when the player is doing some actions that will change the state of the attached items
-    local modData = TorchFix.attachedLight:get()
+    local modData = TorchFix.attachedLight:getRef()
     modData[attachedIndex].isActivated = isActivated
     modData[attachedIndex].battery = battery
 
@@ -128,43 +125,9 @@ TorchFix.syncRemoteTorches = function(player, attachedIndex, battery, isActivate
     TorchFix.attachedLight:transmit()
 end
 
-local function TestPrint(attachedItems)
-
-    for i = 0, attachedItems:size() - 1 do
-        local item = attachedItems:getItemByIndex(i)
-        if item ~= nil then
-            print("Item name: " .. item:getName())
-
-            if item:getAttachedSlotType() ~= nil then
-                print("SlotType: " .. item:getAttachedSlotType())
-            end
-            if item:getAttachmentType() ~= nil then
-                print("AttachmentType: " .. item:getAttachmentType())
-            end
-            if item:getAttachedSlot() ~= nil then
-                print("AttachedSlot: " .. item:getAttachedSlot())
-            end
-            if item:getAttachedToModel() ~= nil then
-                print("AttachedToModel: " .. item:getAttachedToModel())
-            end
-
-            print("Battery: " .. item:getUsedDelta())
-            print("IsActivated: " .. tostring(item:isActivated()))
-            print("Light Strength: " .. item:getLightStrength())
-            print("Can be activated: " .. tostring(item:canBeActivated()))
-        end
-    end
-end
-
 TorchFix.setActivatedAttachedItemForRemotePlayer = function(playerID, attachedIndex, batteryPercentage, isActivated)
     if isClient() then
         local player = getPlayerByOnlineID(playerID)
-
-        -- if getDebug() then
-
-        --     local remoteAttachedItems = player:getAttachedItems()
-        --     TestPrint(remoteAttachedItems)
-        -- end
 
         if player ~= nil then
 
@@ -172,9 +135,6 @@ TorchFix.setActivatedAttachedItemForRemotePlayer = function(playerID, attachedIn
             local item = attachedItems:getItemByIndex(attachedIndex)
 
             if TorchFix.isLightItem(item) then
-
-                -- print("Setting activated index: " .. attachedIndex .. " for player: " .. player:getUsername())
-                -- print("Battery percentage: " .. batteryPercentage)
 
                 item:setActivated(isActivated)
                 item:setUsedDelta(batteryPercentage) -- this is useless because the game doesn't have any update for remote players' items
@@ -267,12 +227,12 @@ TorchFix.onClothingUpdated = function (isoGameCharacter)
 
         if getDebug() then
             print("isoGameCharacter type: " .. tostring(isoGameCharacter))
+            print("Clothing updated")
         end
 
-        print("Clothing updated")
 
         local attachedItems = player:getAttachedItems()
-        local modData = TorchFix.attachedLight:getCopy()
+        local modData = TorchFix.attachedLight:getRef()
 
         local lightActivatedAfterPickup = false
 
@@ -281,34 +241,37 @@ TorchFix.onClothingUpdated = function (isoGameCharacter)
         for i = 0, attachedItems:size() - 1 do
             
             local item = attachedItems:getItemByIndex(i)
-            local oldItem = modData[i]
+            if TorchFix.isLightItem(item) then
+                    
+                currTrackedLight[i] = {}
+                local lightItem = currTrackedLight[i]
+                lightItem.slotType = item:getAttachmentType()
+                lightItem.itemFullType = item:getFullType()
+                lightItem.battery = item:getUsedDelta()
+                lightItem.isActivated = item:isActivated()
 
-            if oldItem ~= nil and item:getAttachmentType() ~= oldItem.slotType then
-            
-                if TorchFix.isLightItem(item)  then
-
-                    currTrackedLight[i] = {}
-                    local lightItem = currTrackedLight[i]
-                    lightItem.slotType = item:getAttachmentType()
-                    lightItem.itemFullType = item:getFullType()
-                    lightItem.battery = item:getUsedDelta()
-                    lightItem.isActivated = item:isActivated()
-
-                    if lightItem.isActivated then
-                        lightActivatedAfterPickup = true
-                    end
-
+                if lightItem.isActivated then
+                    lightActivatedAfterPickup = true
                 end
             end
 
         end
 
+        for attachedIndex,lightItem in pairs(currTrackedLight) do
+            local item = modData[attachedIndex]
+            if item == nil then
+                modData[attachedIndex] = lightItem
+            end
+        end
 
-        -- if not TorchFix.isTableEmpty(currTrackedLight) then
-
-        TorchFix.attachedLight:set(currTrackedLight)
-        if lightActivatedAfterPickup then
+        if TorchFix.isTableEmpty(currTrackedLight) and not TorchFix.attachedLight:isEmpty() then
+            TorchFix.attachedLight:clear()
             TorchFix.attachedLight:transmit()
+        else
+            TorchFix.attachedLight:transmit()
+        end
+
+        if lightActivatedAfterPickup and not TorchFix.isTableEmpty(currTrackedLight) then
             sendClientCommand(player, TorchFixNetwork.ModuleName, TorchFixNetwork.Commands.SendDefferedUpdate, currTrackedLight)
         end
 
@@ -323,11 +286,10 @@ TorchFix.onPlayerSpawn = function ()
         if not TorchFix.isPlayerSpawning then
 
             TorchFix.isPlayerSpawning = true
-            print("Player is spawning")
+            -- print("Player is spawning")
 
 
             if TorchFix.attachedLight == nil then
-                print("Creating new modData")
                 TorchFix.attachedLight = ModDataHandler:new()
             end
 
@@ -335,7 +297,7 @@ TorchFix.onPlayerSpawn = function ()
 
             local globalModDataKey = ModDataHandler.getGlobalModDataKeyWithPlayer(mainPlayer)
 
-            print("Submitting modData for player: " .. globalModDataKey)
+            -- print("Submitting modData for player: " .. globalModDataKey)
     
             local modData = setUpLocalModData(mainPlayer)
 

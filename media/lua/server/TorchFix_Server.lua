@@ -14,7 +14,7 @@ TF_ServerCommands.TorchFixModule.SetActivate = function(player,args)
     sendServerCommand(TorchFixNetwork.ModuleName, TorchFixNetwork.Commands.SetActivate, args)
 end
 
-TF_ServerCommands.TorchFixModule.UpdateAttachedItems = function(player,args)
+TF_ServerCommands.TorchFixModule.SendDefferedUpdate = function(player,args)
 
     local playerID = player:getOnlineID()
 
@@ -22,10 +22,10 @@ TF_ServerCommands.TorchFixModule.UpdateAttachedItems = function(player,args)
     outData.senderID = playerID
     outData.modData = args
 
-    print("Call deffered update for all players from playerID: " .. playerID)
+    -- print("Call deffered update for all players from playerID: " .. playerID)
     
     for attachedIndex,lightItem in pairs(args) do
-        print("Attached Index: " .. attachedIndex)
+        -- print("Attached Index: " .. attachedIndex)
         for i,v in pairs(lightItem) do
             print(tostring(i),tostring(v))
         end
@@ -51,16 +51,19 @@ local function onRecieveGlobalModData(key, modData)
         if requesterOnlineID  then
             
             -- player might want to save to server global mod data
-            local globalModData = TF_Server.modData:get()
+            local globalModData = TF_Server.modData:getRef()
             globalModData[requesterOnlineID] = modData
 
-            for attachedIndex,attachedData in pairs(modData) do
-                print("Received attachedIndex: " .. attachedIndex)
-                print("SlotType: " .. attachedData.slotType)
-                print("ItemFullType: " .. attachedData.itemFullType)
-                print("Battery: " .. attachedData.battery)
-                print("IsActivated: " .. tostring(attachedData.isActivated))
+            if getDebug() then
+                for attachedIndex,attachedData in pairs(modData) do
+                    print("Received attachedIndex: " .. attachedIndex)
+                    print("SlotType: " .. attachedData.slotType)
+                    print("ItemFullType: " .. attachedData.itemFullType)
+                    print("Battery: " .. attachedData.battery)
+                    print("IsActivated: " .. tostring(attachedData.isActivated))
+                end
             end
+
         end
 
     end
@@ -72,7 +75,7 @@ local function onServerStepUpdate()
     -- we are going to update the modData 
     if TF_Server.modData:isEmpty() then return end
 
-    local serverModData = TF_Server.modData:get()
+    local serverModData = TF_Server.modData:getRef()
 
     local removeList = {}
     for playerIndex,_ in lpairs(serverModData) do

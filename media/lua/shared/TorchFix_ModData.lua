@@ -49,17 +49,17 @@ function ModDataHandler:init(key,modData)
     self.modData = ModData.get(key)
 end
 
-function ModDataHandler:get()
+function ModDataHandler:getRef()
     return self.modData
 end
 
 function ModDataHandler:getCopy()
-    self.mutex:lock()
+    -- self.mutex:lock()
     local copy = {}
     for k,v in pairs(self.modData) do
         copy[k] = v
     end
-    self.mutex:unlock()
+    -- self.mutex:unlock()
     return copy
 end
 
@@ -72,34 +72,16 @@ local function isTableEmpty(t)
 end
 
 function ModDataHandler:isEmpty()
-    self.mutex:lock()
+    -- self.mutex:lock()
     local empty = isTableEmpty(self.modData)
-    self.mutex:unlock()
+    -- self.mutex:unlock()
     return empty
 end
 
-function ModDataHandler:set(modData)
-    self.mutex:lock()
-    self.modData = modData
-    self.mutex:unlock()
-end
-
-function ModDataHandler:getCopyAt(index)
-    local copy = {}
-
-    self.mutex:lock()
-    if self.modData[index] then
-        copy = self.modData[index]
-    end
-    self.mutex:unlock()
-
-    return copy
-end
-
 function ModDataHandler:add(index,data)
-    self.mutex:lock()
+    -- self.mutex:lock()
     self.modData[index] = data
-    self.mutex:unlock()
+    -- self.mutex:unlock()
 end
 
 function ModDataHandler:transmit()
@@ -107,7 +89,8 @@ function ModDataHandler:transmit()
 end
 
 function ModDataHandler:clear()
-    ModData.remove(self.key)
+    ModData.add(self.key,{})
+    self.modData = ModData.get(self.key)
 end
 
 function ModDataHandler:new()
@@ -117,7 +100,7 @@ function ModDataHandler:new()
     o.type = "TorchFixModData"
     o.modData = nil
     o.key = nil
-    o.mutex = Mutex:new()
+    -- o.mutex = Mutex:new()
     return o
 end
 
