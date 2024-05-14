@@ -17,7 +17,7 @@ TorchFix.isTableEmpty = function(table)
 end
 
 TorchFix.isLightItem = function(item)
-    return item ~= nil and instanceof(item,"Drainable") and item:getLightStrength() > 0.001
+    return item ~= nil and (instanceof(item,"Drainable") and item:getLightStrength() > 0.001)
 end
 
 TorchFix.defferedUpdateRemotePlayers = function ()
@@ -63,6 +63,10 @@ TorchFix.stepUpdate = function()
     if player == nil or player:isDead() then return end
 
     -- update deferred list
+    -- the idea of deffered update is just to let the server have enough time to sync all the players
+    -- attached items, so that the every client can update the attached items without problems
+
+    -- ofc you can put this in player update function to maybe make it update faster but I prefer this way
     TorchFix.defferedUpdateRemotePlayers()
 
     if TorchFix.attachedLight:isEmpty() then return end
@@ -78,25 +82,26 @@ TorchFix.stepUpdate = function()
     local modData = TorchFix.attachedLight:getRef()
 
     local keysToRemove = {}
-    local isLightChanged = false
+    local hasLightChanged = false
 
     for attachedIndex, lightItem in lpairs(modData) do
         local item = attachedItems:getItemByIndex(attachedIndex)
         local isActivatedLastInit = lightItem.isActivated
 
         if TorchFix.isLightItem(item) then
-            -- update if the battery run out 
-            if not item:isActivated() and isActivatedLastInit then
-                isLightChanged = true
-                TorchFix.syncRemoteTorches(player, attachedIndex, item:getUsedDelta(), false)
+            -- update light item if it doesn't follow vanilla light toggle
+            if item:isEmittingLight() ~= isActivatedLastInit then
+                -- print("Light before update: " .. tostring(isActivatedLastInit))
+                -- print("Light after update: " .. tostring(item:isEmittingLight()))
+                TorchFix.syncRemoteTorches(player, attachedIndex, item:getUsedDelta(), not isActivatedLastInit)
             end
         else
-            isLightChanged = true
+            hasLightChanged = true
             table.insert(keysToRemove, attachedIndex)
         end
     end
 
-    if isLightChanged then
+    if hasLightChanged then
 
         for _, key in ipairs(keysToRemove) do
             modData[key] = nil
@@ -246,6 +251,14 @@ TorchFix.onClothingUpdated = function (isoGameCharacter)
                 currTrackedLight[i] = {}
                 local lightItem = currTrackedLight[i]
                 lightItem.slotType = item:getAttachmentType()
+
+                if getDebug() then
+                    print("Item attached slot: " .. (item:getAttachedSlot() or "nil"))
+                    print("Item attachment type: " .. (item:getAttachmentType() or "nil"))
+                    print("Item attached to model: " .. (item:getAttachedToModel() or "nil"))
+                end
+
+
                 lightItem.itemFullType = item:getFullType()
                 lightItem.battery = item:getUsedDelta()
                 lightItem.isActivated = item:isActivated()
