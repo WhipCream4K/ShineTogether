@@ -198,24 +198,19 @@ end
 
 TorchFix.onCreatePlayer = function(playerIndex,player)
     
-    if isClient() then
-        -- this is for the time when the player is dead and want to start a new game
-        Events.EveryOneMinute.Add(TorchFix.onPlayerSpawn)
-        Events.OnCreatePlayer.Remove(TorchFix.onCreatePlayer)
-    end
+    -- this is for the time when the player is dead and want to start a new game
+    Events.EveryOneMinute.Add(TorchFix.onPlayerSpawn)
+    Events.OnCreatePlayer.Remove(TorchFix.onCreatePlayer)
 
 end
 
 TorchFix.onPlayerDeath = function(player)
 
-    if isClient() then
-
-        TorchFix.attachedLight = nil
-        TorchFix.isPlayerSpawning = false
-        
-        Events.OnCreatePlayer.Add(TorchFix.onCreatePlayer)
-
-    end
+    TorchFix.attachedLight:clear()
+    TorchFix.attachedLight:transmit()
+    TorchFix.isPlayerSpawning = false
+    
+    Events.OnCreatePlayer.Add(TorchFix.onCreatePlayer)
 
 end
 
@@ -270,6 +265,9 @@ TorchFix.onClothingUpdated = function (isoGameCharacter)
 
         end
 
+        -- TODO: Handle the case when the player is damage by zombie and it resets the attached items
+        -- resulting in garbage data send to server
+
         for attachedIndex,lightItem in pairs(currTrackedLight) do
             local item = modData[attachedIndex]
             if item == nil then
@@ -299,8 +297,6 @@ TorchFix.onPlayerSpawn = function ()
         if not TorchFix.isPlayerSpawning then
 
             TorchFix.isPlayerSpawning = true
-            -- print("Player is spawning")
-
 
             if TorchFix.attachedLight == nil then
                 TorchFix.attachedLight = ModDataHandler:new()
@@ -309,8 +305,6 @@ TorchFix.onPlayerSpawn = function ()
             local mainPlayer = getPlayer()
 
             local globalModDataKey = ModDataHandler.getGlobalModDataKeyWithPlayer(mainPlayer)
-
-            -- print("Submitting modData for player: " .. globalModDataKey)
     
             local modData = setUpLocalModData(mainPlayer)
 
@@ -325,6 +319,8 @@ TorchFix.onPlayerSpawn = function ()
         end
     end
 end
+
+
 
 local function onGameStart()
 

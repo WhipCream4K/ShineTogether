@@ -21,14 +21,13 @@ TF_ServerCommands.TorchFixModule.SendDefferedUpdate = function(player, args)
     outData.senderID = playerID
     outData.modData = args
 
-    -- print("Call deffered update for all players from playerID: " .. playerID)
 
-    for attachedIndex, lightItem in pairs(args) do
-        -- print("Attached Index: " .. attachedIndex)
-        for i, v in pairs(lightItem) do
-            print(tostring(i), tostring(v))
-        end
-    end
+    -- for attachedIndex, lightItem in pairs(args) do
+    --     -- print("Attached Index: " .. attachedIndex)
+    --     for i, v in pairs(lightItem) do
+    --         print(tostring(i), tostring(v))
+    --     end
+    -- end
 
     sendServerCommand(TorchFixNetwork.ModuleName, TorchFixNetwork.Commands.SendDefferedUpdate, outData)
 end
@@ -41,9 +40,8 @@ end
 
 local function onRecieveGlobalModData(key, modData)
     if ModDataHandler.checkGlobalModDataKey(key) then
-        if getDebug() then
-            print("Received global modData with key: " .. key)
-        end
+
+        -- print("Received global modData with key: " .. key)
 
         local requesterOnlineID = ModDataHandler.getOnlineIDFromKey(key)
 
@@ -53,13 +51,13 @@ local function onRecieveGlobalModData(key, modData)
             globalModData[requesterOnlineID] = modData
 
 
-            for attachedIndex, attachedData in pairs(modData) do
-                print("Received attachedIndex: " .. attachedIndex)
-                print("SlotType: " .. attachedData.slotType)
-                print("ItemFullType: " .. attachedData.itemFullType)
-                print("Battery: " .. attachedData.battery)
-                print("IsActivated: " .. tostring(attachedData.isActivated))
-            end
+            -- for attachedIndex, attachedData in pairs(modData) do
+            --     print("Received attachedIndex: " .. attachedIndex)
+            --     print("SlotType: " .. attachedData.slotType)
+            --     print("ItemFullType: " .. attachedData.itemFullType)
+            --     print("Battery: " .. attachedData.battery)
+            --     print("IsActivated: " .. tostring(attachedData.isActivated))
+            -- end
         end
     end
 end
