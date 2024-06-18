@@ -46,18 +46,11 @@ local function onRecieveGlobalModData(key, modData)
         local requesterOnlineID = ModDataHandler.getOnlineIDFromKey(key)
 
         if requesterOnlineID then
+            
             -- player might want to save to server global mod data
             local globalModData = TF_Server.modData:getRef()
             globalModData[requesterOnlineID] = modData
 
-
-            -- for attachedIndex, attachedData in pairs(modData) do
-            --     print("Received attachedIndex: " .. attachedIndex)
-            --     print("SlotType: " .. attachedData.slotType)
-            --     print("ItemFullType: " .. attachedData.itemFullType)
-            --     print("Battery: " .. attachedData.battery)
-            --     print("IsActivated: " .. tostring(attachedData.isActivated))
-            -- end
         end
     end
 end

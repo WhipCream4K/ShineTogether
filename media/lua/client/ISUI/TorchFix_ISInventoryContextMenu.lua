@@ -14,7 +14,7 @@ ISInventoryPaneContextMenu.onActivateItem = function(light, playerIndex)
 
     local isActivated = light:isActivated()
 
-    local copyModData = TorchFix.attachedLight:getCopy()
+    local copyModData = TorchFix.AttachLightManager:getCopy()
     local attachedItems = player:getAttachedItems()
 
     for attachedIndex, lightItem in pairs(copyModData) do

@@ -1,9 +1,12 @@
 require "TorchFix_Main"
+local Network = require "TorchFix_Variables"
 
-TF_ClientCommands = {}
-TF_ClientCommands.TorchFixModule = {}
+TorchFixClient = {}
+TorchFixClient[Network.ModuleName] = {}
 
-TF_ClientCommands.TorchFixModule.SendDefferedUpdate = function (args)
+local ClientOps = TorchFixClient[Network.ModuleName]
+
+ClientOps[Network.Commands.SendDefferedUpdate] = function (args)
    
     if args == nil then return end
 
@@ -13,11 +16,11 @@ TF_ClientCommands.TorchFixModule.SendDefferedUpdate = function (args)
 
     local modData = args.modData
 
-    local copyDefferedUpdateList = TorchFix.defferredUpdateList:getCopy()
+    local copyDefferedUpdateList = TorchFix.defferredUpdateLights:getCopy()
 
     copyDefferedUpdateList[senderID] = modData
 
-    TorchFix.defferredUpdateList:set(copyDefferedUpdateList)
+    TorchFix.defferredUpdateLights:set(copyDefferedUpdateList)
 
     -- if getDebug() then
     --     for playerID, modData in pairs(copyDefferedUpdateList) do
@@ -33,7 +36,7 @@ TF_ClientCommands.TorchFixModule.SendDefferedUpdate = function (args)
 
 end
 
-TF_ClientCommands.TorchFixModule.SetActivate = function(args)
+ClientOps[Network.Commands.SetActivate] = function(args)
     local playerID = args[TorchFixNetwork.ModData.OnlineID]
     if playerID == getPlayer():getOnlineID() then
         return
@@ -47,8 +50,8 @@ TF_ClientCommands.TorchFixModule.SetActivate = function(args)
 end
 
 local function onServerToClient(module, command, args)
-    if TF_ClientCommands[module] and TF_ClientCommands[module][command] then
-        TF_ClientCommands[module][command](args)
+    if TorchFixClient[module] and TorchFixClient[module][command] then
+        TorchFixClient[module][command](args)
     end
 end
 
@@ -56,4 +59,4 @@ end
 Events.OnServerCommand.Add(onServerToClient)
 
 
-return TF_ClientCommands
+return TorchFixClient

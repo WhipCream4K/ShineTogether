@@ -12,9 +12,9 @@ function ISInventoryTransferAction:perform()
 
     if TorchFix.isLightItem(item) then return end
 
-    if TorchFix.attachedLight:isEmpty() then return end
+    if TorchFix.AttachLightManager:isEmpty() then return end
 
-    local copyModData = TorchFix.attachedLight:getCopy()
+    local copyModData = TorchFix.AttachLightManager:getCopy()
 
     local attachedItems = player:getAttachedItems()
 

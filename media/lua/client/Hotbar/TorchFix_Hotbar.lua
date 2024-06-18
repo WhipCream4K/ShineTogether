@@ -20,10 +20,10 @@ function ISHotbar:activateSlot(slotIndex)
 
     if player == nil or player:isDead() then return end
 
-    if TorchFix.attachedLight:isEmpty() then return end
+    if TorchFix.AttachLightManager:isEmpty() then return end
 
     local attachedItems = player:getAttachedItems()
-    local copyModData = TorchFix.attachedLight:getCopy()
+    local copyModData = TorchFix.AttachLightManager:getCopy()
 
     for attachedIndex, lightItem in pairs(copyModData) do
         local attachedItem = attachedItems:getItemByIndex(attachedIndex)

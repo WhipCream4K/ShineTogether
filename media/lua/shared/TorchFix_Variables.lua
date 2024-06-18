@@ -6,7 +6,9 @@ TorchFixNetwork.Commands = {
     SetActivate = "SetActivate",
     SendDefferedUpdate = "SendDefferedUpdate",
     PlayerDisconnected = "PlayerDisconnected",
-    Attached = "Attached" -- !!This cannot be changed because it is hard coded in the GameServer.class
+    -- Attached = "Attached" -- !!This cannot be changed because it is hard coded in the GameServer.class
+    requestAttachedLights = "requestAttachedLights",
+    transmitAttachedLights = "transmitAttachedLights"
 }
 
 TorchFixNetwork.ModData = {

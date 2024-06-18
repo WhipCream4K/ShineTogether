@@ -11,9 +11,9 @@ function ItemBindingHandler.toggleLight(key)
     local player = getPlayer()
     if player == nil or player:isDead() then return end
     
-    if TorchFix.attachedLight:isEmpty() then return end
+    if TorchFix.AttachLightManager:isEmpty() then return end
 
-    local copyModData = TorchFix.attachedLight:getCopy()
+    local copyModData = TorchFix.AttachLightManager:getCopy()
     local attachedItems = player:getAttachedItems()
 
     for attachedIndex, lightItem in pairs(copyModData) do
