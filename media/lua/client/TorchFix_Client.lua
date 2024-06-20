@@ -1,26 +1,33 @@
 require "TorchFix_Main"
-local Network = require "TorchFix_Variables"
+local Network = require "TorchFix_Network"
+require "TorchFix_AttachedLightManager"
 
 TorchFixClient = {}
-TorchFixClient[Network.ModuleName] = {}
+TorchFixClient[Network.Module] = {}
 
-local ClientOps = TorchFixClient[Network.ModuleName]
+local ClientOps = TorchFixClient[Network.Module]
 
-ClientOps[Network.Commands.SendDefferedUpdate] = function (args)
-   
-    if args == nil then return end
+ClientOps[Network.Commands.transmitLightState] = function (args)
 
-    local senderID = args.senderID
 
-    if senderID == getPlayer():getOnlineID() then return end
+    local attachLightManager = TorchFix.getAttachedLightManager()
+    if attachLightManager == nil then return end
+    
+    attachLightManager:setRemoteUpdateLists(args)
 
-    local modData = args.modData
+    -- if args == nil then return end
 
-    local copyDefferedUpdateList = TorchFix.defferredUpdateLights:getCopy()
+    -- local senderID = args.senderID
 
-    copyDefferedUpdateList[senderID] = modData
+    -- if senderID == getPlayer():getOnlineID() then return end
 
-    TorchFix.defferredUpdateLights:set(copyDefferedUpdateList)
+    -- local modData = args.modData
+
+    -- local copyDefferedUpdateList = TorchFix.defferredUpdateLights:getCopy()
+
+    -- copyDefferedUpdateList[senderID] = modData
+
+    -- TorchFix.defferredUpdateLights:set(copyDefferedUpdateList)
 
     -- if getDebug() then
     --     for playerID, modData in pairs(copyDefferedUpdateList) do
@@ -36,18 +43,24 @@ ClientOps[Network.Commands.SendDefferedUpdate] = function (args)
 
 end
 
-ClientOps[Network.Commands.SetActivate] = function(args)
-    local playerID = args[TorchFixNetwork.ModData.OnlineID]
-    if playerID == getPlayer():getOnlineID() then
-        return
-    end
-
-    local attachedIndex = args[TorchFixNetwork.ModData.AttachedLightIndex]
-    local batteryPercentage = args[TorchFixNetwork.ModData.Battery]
-    local isActivated = args[TorchFixNetwork.ModData.IsActivated]
-
-    TorchFix.setActivatedAttachedItemForRemotePlayer(playerID, attachedIndex, batteryPercentage, isActivated)
+ClientOps[Network.Commands.requestAttachedLights] = function(args)
+    local attachLightManager = TorchFix.getAttachedLightManager()
+    if attachLightManager == nil then return end
+    
+    attachLightManager:setRemoteUpdateLists(args)
 end
+
+-- ClientOps[Network.Commands.SetActivate] = function(args)
+--     local playerID = args[TorchFixNetwork.ModData.OnlineID]
+--     if playerID == getPlayer():getOnlineID() then
+--         return
+--     end
+--     local attachedIndex = args[TorchFixNetwork.ModData.AttachedLightIndex]
+--     local batteryPercentage = args[TorchFixNetwork.ModData.Battery]
+--     local isActivated = args[TorchFixNetwork.ModData.IsActivated]
+
+--     TorchFix.setActivatedAttachedItemForRemotePlayer(playerID, attachedIndex, batteryPercentage, isActivated)
+-- end
 
 local function onServerToClient(module, command, args)
     if TorchFixClient[module] and TorchFixClient[module][command] then
