@@ -45,6 +45,11 @@ ClientOps[Network.Commands.removeGlobal] = function (args)
     -- end
 
     -- local pointlight = playerModData[args.uniqueID]
+
+    if getDebug() then
+        print("Remove global point light for uniqueID: " .. args.uniqueID)
+    end
+
     pointlight:_remove()
 end
 

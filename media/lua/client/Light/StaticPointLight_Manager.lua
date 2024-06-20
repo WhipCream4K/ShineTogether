@@ -14,27 +14,15 @@ Manager.onPlayerUpdate = function (player)
 
 end
 
-
-Manager.forceRemoveLights = function (playerID)
+Manager.removeLight = function (uniqueID)
     
-    local lights = Manager.getLights(playerID)
-
-    for _, pointLight in ipairs(lights) do
-        pointLight:_remove()
-    end
-
-    lights = nil
-end
-
-Manager.removeLight = function (playerID,index)
+    local light = Manager.getLight(uniqueID)
     
-    local lights = Manager.getLights(playerID)
-
-    if lights[index] == nil then
+    if light == nil then
         return
     end
 
-    lights[index] = nil
+    light = nil
 end
 
 Manager.updateDeferredPointLights = function ()
@@ -54,7 +42,7 @@ Manager.updateDeferredPointLights = function ()
             light:setActive(true)
 
             Manager.removeDeferredLight(uniqueID)
-            Manager.addActiveLight(light)
+            Manager.addActiveLight(uniqueID,light)
         end
     end
 
@@ -68,16 +56,16 @@ Manager.updateActivePointLights = function ()
         return
     end
 
-    for uniqueID,pointlight in pairs(activeLights) do
-        local square = localGetSquare(pointlight.x, pointlight.y, pointlight.z)
+    for uniqueID,light in pairs(activeLights) do
+        local square = localGetSquare(light.x, light.y, light.z)
         if not Manager.isLightExist(uniqueID) then
             Manager.removeActiveLight(uniqueID)
         elseif square == nil then
 
-            pointlight:destroy()
+            light:destroy()
 
             Manager.removeActiveLight(uniqueID)
-            Manager.addDeferredLight(pointlight)
+            Manager.addDeferredLight(uniqueID,light)
         end
 
     end
@@ -95,7 +83,6 @@ end
 
 Manager.addActiveLight = function (uniqueID,playerLightInstance)
     Manager.activeLights = Manager.activeLights or {}
-    Manager.activeLights[uniqueID] = Manager.activeLights[uniqueID] or {}
     Manager.activeLights[uniqueID] = playerLightInstance
 end
 
@@ -123,7 +110,6 @@ end
 Manager.addDeferredLight = function (uniqueID, playerLightInstance)
     
     Manager.deferredLights = Manager.deferredLights or {}
-    Manager.deferredLights[uniqueID] = Manager.deferredLights[uniqueID] or {}
     Manager.deferredLights[uniqueID] = playerLightInstance
     
 end
@@ -157,7 +143,7 @@ Manager.addLight = function (uniqueID,playerLightInstance)
     Manager.instances[uniqueID] = Manager.instances[uniqueID] or {}
     Manager.instances[uniqueID] = playerLightInstance
 
-    Manager.addDeferredLight(uniqueID,playerLightInstance)
+    Manager.addActiveLight(uniqueID,playerLightInstance)
 
 end
 
