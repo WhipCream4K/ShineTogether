@@ -8,15 +8,15 @@ end
 
 local function setupLightAttachment(player)
     
-    local outData = {}
+    local outData = nil
     local attachedItems = player:getAttachedItems()
     for i = 0, attachedItems:size() - 1 do
         local item = attachedItems:getItemByIndex(i)
         if isLightItem(item) then
-            
-            local itemID = item:getID()
-            outData[itemID] = {}
-            local lightAttachment = outData[itemID]
+
+            outData = outData or {}
+            outData[i] = {}
+            local lightAttachment = outData[i]
 
             -- lightAttachment.slotType = item:getAttachmentType()
             -- lightAttachment.itemFullType = item:getType()
@@ -58,15 +58,24 @@ function AttachedLightManager:new(playerObj)
     o.chr = playerObj
     o.lights = setupLightAttachment(playerObj)
     o.remoteUpdateLists = nil
+    o.remoteUpdateCount = 0
 
-    sendClientCommand(playerObj, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitAttachedLights, o.lights)
+    if o.lights ~= nil then
+        sendClientCommand(playerObj, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitToServer, o.lights)
+    end
+
     sendClientCommand(playerObj, TorchFixNetwork.Module, TorchFixNetwork.Commands.requestAttachedLights, nil)
 
     return o
 end
 
-function AttachedLightManager:setRemoteUpdateLists(remoteUpdateLists)
-    self.remoteUpdateLists = remoteUpdateLists
+function AttachedLightManager:addRemoteUpdateLists(playerID,lights)
+    -- self.remoteUpdateLists = remoteUpdateLists
+    if self.remoteUpdateLists == nil then
+        self.remoteUpdateLists = {}
+    end
+
+    self.remoteUpdateLists[playerID] = lights
 end
 
 function AttachedLightManager:refresh(player)
@@ -76,22 +85,23 @@ function AttachedLightManager:refresh(player)
     local attachedItems = player:getAttachedItems()
     local currentLights = {}
 
-    local preActivateLights = {}
+    local preActivateLights = nil
 
     for i = 0, attachedItems:size() - 1 do
         local item = attachedItems:getItemByIndex(i)
         if isLightItem(item) then
             currentLights[i] = {}
-            local lightAttachment = currentLights[i]
+            local lightItem = currentLights[i]
 
             -- lightAttachment.slotType = item:getAttachmentType()
             -- lightAttachment.itemType = item:getType()
             -- lightAttachment.battery = item:getUsedDelta()
-            lightAttachment.itemID = item:getID()
-            lightAttachment.isActivated = item:isActivated()
+            lightItem.itemID = item:getID()
+            lightItem.isActivated = item:isActivated()
 
             if item:isActivated() then
-                preActivateLights[i] = lightAttachment
+                preActivateLights = preActivateLights or {}
+                preActivateLights[i] = lightItem
             end
 
         end
@@ -100,16 +110,20 @@ function AttachedLightManager:refresh(player)
     local isSame = true
 
     -- Remove lights that are no longer attached
-    for i,light in pairs(self.lights) do
-        if currentLights[i] == nil then
-            self.lights[i] = nil
-            isSame = false
+    if self.lights ~= nil then
+        for i,light in pairs(self.lights) do
+            if currentLights[i] == nil then
+                self.lights[i] = nil
+                isSame = false
+            end
         end
     end
 
+
     -- Add new lights
     for i,light in pairs(currentLights) do
-        if self.lights[i] == nil then
+        if self.lights == nil or self.lights[i] == nil then
+            self.lights = self.lights or {}
             self.lights[i] = light
             isSame = false
         end
@@ -118,11 +132,15 @@ function AttachedLightManager:refresh(player)
     if not isSame then
         self:sendToServer()
         if preActivateLights ~= nil then
-            self:transmitLightStates(preActivateLights)
+            self:transmitToClients(preActivateLights)
         end
     end
 
 
+end
+
+function AttachedLightManager:getOnlineID()
+    return self.chr:getOnlineID()
 end
 
 function AttachedLightManager:remotePlayerUpdate()
@@ -139,8 +157,9 @@ function AttachedLightManager:remotePlayerUpdate()
             for attachedIndex,lightItem in pairs(lightAttachment) do
 
                 local item = remoteAttachedItems:getItemByIndex(attachedIndex)
-                if item ~= nil then
+                if isLightItem(item) then
                     item:setActivated(lightItem.isActivated)
+                    item:setUsedDelta(1.0)
                 end
 
             end
@@ -149,16 +168,34 @@ function AttachedLightManager:remotePlayerUpdate()
 
     end
 
-    self.remoteUpdateLists = nil
+    self.remoteUpdateCount = self.remoteUpdateCount + 1
+    
+    -- This is a naive solution to handle a situation when player is attaching a light item that is already activated
+    -- and the data is sent to the server before the light item is properly propagates to clients.
+    if self.remoteUpdateCount == 2 then
+        self.remoteUpdateCount = 0
+        self.remoteUpdateLists = nil
+    end
 
 end
 
+
+
 local localPairs = pairs
+
+function AttachedLightManager:onOneMinute()
+    
+    self:remotePlayerUpdate()
+
+end
+
 function AttachedLightManager:playerUpdate(player)
     
     if player ~= self.chr then return end
 
     self:remotePlayerUpdate()
+
+    if self.lights == nil then return end
 
     local hasLightChanged = false
     local attachedItems = player:getAttachedItems()
@@ -168,7 +205,7 @@ function AttachedLightManager:playerUpdate(player)
         local item = attachedItems:getItemByIndex(attachedIndex)
         local isActivatedLastInit = lightItem.isActivated
 
-        if TorchFix.isLightItem(item) then
+        if isLightItem(item) then
             -- update light item if it doesn't follow vanilla light toggle
             local isEmittingLight = item:isEmittingLight()
             if isEmittingLight ~= isActivatedLastInit then
@@ -181,13 +218,13 @@ function AttachedLightManager:playerUpdate(player)
     end
 
     if hasLightChanged then
-        self:transmitLightStates(lightStates)
+        self:transmitToClients(lightStates)
     end
 
 end
 
-function AttachedLightManager:transmitLightStates(lightStates)
-    sendClientCommand(self.chr, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitLightState, lightStates)
+function AttachedLightManager:transmitToClients(lightStates)
+    sendClientCommand(self.chr, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitToClients, lightStates)
 end
 
 function AttachedLightManager:getAttachedLights()
@@ -195,11 +232,7 @@ function AttachedLightManager:getAttachedLights()
 end
 
 function AttachedLightManager:sendToServer()
-    sendClientCommand(self.chr, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitAttachedLights, self.lights)
-end
-
-function AttachedLightManager:delete()
-    table.remove(AttachedLightManager.instances, self.instanceIdx)
+    sendClientCommand(self.chr, TorchFixNetwork.Module, TorchFixNetwork.Commands.transmitToServer, self.lights)
 end
 
 return AttachedLightManager

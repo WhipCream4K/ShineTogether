@@ -8,19 +8,8 @@ TorchFixNetwork.Commands = {
     PlayerDisconnected = "PlayerDisconnected",
     -- Attached = "Attached" -- !!This cannot be changed because it is hard coded in the GameServer.class
     requestAttachedLights = "requestAttachedLights",
-    transmitAttachedLights = "transmitAttachedLights",
-    transmitLightState = "transmitLightState"
+    transmitToServer = "transmitToServer",
+    transmitToClients = "transmitToClients"
 }
-
--- TorchFixNetwork.ModData = {
---     AttachedLightIndicies = "attachedLightIndicies",
---     DirtyIndicies = "dirtyIndicies",
---     AttachedLightIndex = "attachedLightIndex", -- !!This cannot be changed because it is hard coded in the GameServer.class
---     OnlineID = "onlineID", -- !!This cannot be changed because it is hard coded in the GameServer.class
---     Battery = "battery",
---     IsActivated = "isActivated",
---     SlotType = "slotType", -- !!This cannot be changed because it is hard coded in the GameServer.class
---     ItemFullType = "itemFullType" -- !!This cannot be changed because it is hard coded in the GameServer.class
--- }
 
 return TorchFixNetwork
