@@ -3,16 +3,17 @@ local Network = require "Light/PlayerPointLight_Network"
 
 if isClient() then return end
 
+PlayerPointLight_Server = {}
+PlayerPointLight_Server.ServerData = nil
 
 --#region Server ModData
 
-local function getServerModData()
-    return ModData.get("PlayerPointLight")
-end
+-- local function getServerModData()
+--     return ModData.get("PlayerPointLight")
+-- end
 
 local function onGlobalModDataLoad(isNewGame)
-    local serverModData = ModData.getOrCreate("PlayerPointLight")
-    serverModData = nil
+    PlayerPointLight_Server.ServerData = {}
 end
 
 Events.OnInitGlobalModData.Add(onGlobalModDataLoad)
@@ -38,7 +39,8 @@ function ServerPointLight:new( playerID, r, g, b, radius )
     return o
 end
 
-PlayerPointLight_Server = {}
+
+
 PlayerPointLight_Server[Network.Module] = {}
 local ServerOps = PlayerPointLight_Server[Network.Module]
 
@@ -50,9 +52,9 @@ ServerOps[Network.Commands.createRemote] = function (player,args)
     local b = args.b
     local radius = args.radius
 
-    local modData = getServerModData()
-    modData[playerID] = modData[playerID] or {}
-    modData[playerID][args.index] = ServerPointLight:new(playerID, r, g, b, radius)
+    local serverData = PlayerPointLight_Server.ServerData
+    serverData[playerID] = serverData[playerID] or {}
+    serverData[playerID][args.index] = ServerPointLight:new(playerID, r, g, b, radius)
 
     -- print("Create remote point light for playerID: " .. playerID)
     -- print("r: " .. r)
@@ -69,7 +71,7 @@ ServerOps[Network.Commands.removeRemote] = function (player,args)
     local playerID = args.playerID
     local index = args.index
 
-    local modData = getServerModData()
+    local modData = PlayerPointLight_Server.ServerData
     if modData[playerID] == nil then return end
     if modData[playerID][index] == nil then return end
 
@@ -88,7 +90,7 @@ ServerOps[Network.Commands.setRemoteActive] = function (player,args)
     local index = args.index
     local active = args.value
 
-    local modData = getServerModData()
+    local modData = PlayerPointLight_Server.ServerData
     if modData[playerID] == nil then return end
     if modData[playerID][index] == nil then return end
 
@@ -104,7 +106,7 @@ end
 
 ServerOps[Network.Commands.requestAll] = function (player,args)
 
-    local modData = getServerModData()
+    local modData = PlayerPointLight_Server.ServerData
 
     -- print("Request all point lights")
 
@@ -122,7 +124,7 @@ end
 
 local function onServerStepUpdate()
     
-    local modData = getServerModData()
+    local modData = PlayerPointLight_Server.ServerData
     if modData == nil then return end
 
     for playerID, pointLights in pairs(modData) do

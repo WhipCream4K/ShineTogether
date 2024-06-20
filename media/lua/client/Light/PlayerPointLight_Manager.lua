@@ -22,7 +22,8 @@ Manager.forceRemoveLights = function (playerID)
         pointLight:_remove()
     end
 
-    lights = nil
+    Manager.removeActiveLights(playerID)
+    Manager.removeDeferredLights(playerID)
 end
 
 Manager.removeLight = function (playerID,index)
@@ -143,17 +144,13 @@ end
 
 Manager.removeActiveLight = function (playerID,index)
     
-    local lights = Manager.getActiveLights()[playerID]
+    local lights = Manager.getActiveLights()
     
-    if lights == nil then
+    if lights[playerID] == nil then
         return
     end
     
-    if lights[index] == nil then
-        return
-    end
-    
-    lights[index] = nil
+    lights[playerID][index] = nil
     
 end
 
@@ -181,17 +178,13 @@ end
 
 Manager.removeDeferredLight = function (playerID,index)
     
-    local lights = Manager.getDeferredLights()[playerID]
+    local lights = Manager.getDeferredLights()
     
-    if lights == nil then
+    if lights[playerID] == nil then
         return
     end
     
-    if lights[index] == nil then
-        return
-    end
-    
-    lights[index] = nil
+    lights[playerID][index] = nil
     
 end
 

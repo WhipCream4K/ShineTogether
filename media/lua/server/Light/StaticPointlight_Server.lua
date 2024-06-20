@@ -5,16 +5,16 @@ if isClient() then return end
 
 
 StaticPointLight_Server = {}
+StaticPointLight_Server.ServerData = nil
 
 --#region Server ModData
 
 local function getServerModData()
-    return ModData.getOrCreate("StaticPointLight")
+    return StaticPointLight_Server.ServerData
 end
 
 local function onGlobalModDataLoad(isNewGame)
-    local serverModData = ModData.getOrCreate("StaticPointLight")
-    serverModData = nil
+    StaticPointLight_Server.ServerData = {}
 end
 
 Events.OnInitGlobalModData.Add(onGlobalModDataLoad)

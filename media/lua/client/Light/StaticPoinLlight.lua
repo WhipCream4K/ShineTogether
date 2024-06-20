@@ -137,7 +137,6 @@ end
 function StaticPointLight:destroy()
     
     if self.lightSource ~= nil then
-        print("Destroying light source")
         local targetCell = getCell()
         targetCell:removeLamppost(self.lightSource)
         self.lightSource = nil
@@ -149,6 +148,7 @@ function StaticPointLight:setActive(value)
 
     if value then
         if self.lightSource == nil then
+            print("Recreating light source")
             self.lightSource = initLight(self, true, true)
         end
     else

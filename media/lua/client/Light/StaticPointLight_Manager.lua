@@ -16,13 +16,10 @@ end
 
 Manager.removeLight = function (uniqueID)
     
-    local light = Manager.getLight(uniqueID)
-    
-    if light == nil then
-        return
+    local lights = Manager.getLights()
+    if lights[uniqueID] ~= nil then
+        lights[uniqueID] = nil
     end
-
-    light = nil
 end
 
 Manager.updateDeferredPointLights = function ()
@@ -88,13 +85,8 @@ end
 
 Manager.removeActiveLight = function (uniqueID)
     
-    local light = Manager.getActiveLights()[uniqueID]
-
-    if light == nil then
-        return
-    end
-
-    light = nil
+    local lights = Manager.getActiveLights()
+    lights[uniqueID] = nil
     
 end
 
@@ -116,13 +108,8 @@ end
 
 Manager.removeDeferredLight = function (uniqueID)
     
-    local light = Manager.getDeferredLights()[uniqueID]
-    
-    if light == nil then
-        return
-    end
-    
-    light = nil
+    local lights = Manager.getDeferredLights()
+    lights[uniqueID] = nil
     
 end
 
@@ -143,7 +130,7 @@ Manager.addLight = function (uniqueID,playerLightInstance)
     Manager.instances[uniqueID] = Manager.instances[uniqueID] or {}
     Manager.instances[uniqueID] = playerLightInstance
 
-    Manager.addActiveLight(uniqueID,playerLightInstance)
+    Manager.addDeferredLight(uniqueID,playerLightInstance)
 
 end
 
