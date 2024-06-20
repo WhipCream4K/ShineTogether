@@ -42,7 +42,7 @@ PlayerPointLight_Server = {}
 PlayerPointLight_Server[Network.Module] = {}
 local ServerOps = PlayerPointLight_Server[Network.Module]
 
-ServerOps[Network.Commands.createRemotePointLight] = function (player,args)
+ServerOps[Network.Commands.createRemote] = function (player,args)
 
     local playerID = args.playerID
     local r = args.r
@@ -60,11 +60,11 @@ ServerOps[Network.Commands.createRemotePointLight] = function (player,args)
     -- print("b: " .. b)
     -- print("radius: " .. radius)
 
-    sendServerCommand(Network.Module, Network.Commands.createRemotePointLight, args)
+    sendServerCommand(Network.Module, Network.Commands.createRemote, args)
 
 end
 
-ServerOps[Network.Commands.removeRemotePointLight] = function (player,args)
+ServerOps[Network.Commands.removeRemote] = function (player,args)
 
     local playerID = args.playerID
     local index = args.index
@@ -78,7 +78,7 @@ ServerOps[Network.Commands.removeRemotePointLight] = function (player,args)
     -- print("Remove remote point light for playerID: " .. playerID)
     -- print("index: " .. index)
 
-    sendServerCommand(Network.Module, Network.Commands.removeRemotePointLight, args)
+    sendServerCommand(Network.Module, Network.Commands.removeRemote, args)
 
 end
 
@@ -102,13 +102,13 @@ ServerOps[Network.Commands.setRemoteActive] = function (player,args)
 
 end
 
-ServerOps[Network.Commands.requestAllPointLights] = function (player,args)
+ServerOps[Network.Commands.requestAll] = function (player,args)
 
     local modData = getServerModData()
 
     -- print("Request all point lights")
 
-    sendServerCommand(player,Network.Module, Network.Commands.receiveAllPointLights, modData)
+    sendServerCommand(player,Network.Module, Network.Commands.receiveAll, modData)
 
 end
 

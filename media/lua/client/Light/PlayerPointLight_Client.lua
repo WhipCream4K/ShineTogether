@@ -1,4 +1,6 @@
 require "Light/PlayerPointLight"
+
+local Manager = require "Light/PlayerPointLight_Manager"
 local Network = require "Light/PlayerPointLight_Network"
 
 if not isClient() then return end
@@ -7,7 +9,7 @@ PlayerPointLight_Client = {}
 PlayerPointLight_Client[Network.Module] = {}
 local ClientOps = PlayerPointLight_Client[Network.Module]
 
-ClientOps[Network.Commands.createRemotePointLight] = function (args)
+ClientOps[Network.Commands.createRemote] = function (args)
     
     if args == nil then return end
 
@@ -24,7 +26,7 @@ ClientOps[Network.Commands.createRemotePointLight] = function (args)
 end
 
 
-ClientOps[Network.Commands.removeRemotePointLight] = function (args)
+ClientOps[Network.Commands.removeRemote] = function (args)
     
     local player = getPlayer()
     if player == nil then return end
@@ -34,14 +36,16 @@ ClientOps[Network.Commands.removeRemotePointLight] = function (args)
     local playerID = args.playerID
     local index = args.index
 
-    local modData = player:getModData()[PlayerPointLight.modDataName]
-    if modData == nil then return end
+    local pointLight = Manager.getLight(playerID,index)
 
-    if modData[playerID] == nil then return end
-    if modData[playerID][index] == nil then return end
+    -- local modData = player:getModData()[PlayerPointLight.modDataName]
+    -- if modData == nil then return end
 
-    local pointLight = modData[playerID][index]
-    if pointLight == nil then return end
+    -- if modData[playerID] == nil then return end
+    -- if modData[playerID][index] == nil then return end
+
+    -- local pointLight = modData[playerID][index]
+    -- if pointLight == nil then return end
 
     if getDebug() then
         print("Remove remote point light for playerID: " .. playerID)
@@ -63,14 +67,18 @@ ClientOps[Network.Commands.setRemoteActive] = function (args)
     local index = args.index
     local active = args.value
 
-    local modData = player:getModData()[PlayerPointLight.modDataName]
-    if modData == nil then return end
+    local pointLight = Manager.getLight(playerID,index)
 
-    if modData[playerID] == nil then return end
-    if modData[playerID][index] == nil then return end
-
-    local pointLight = modData[playerID][index]
     if pointLight == nil then return end
+
+    -- local modData = player:getModData()[PlayerPointLight.modDataName]
+    -- if modData == nil then return end
+
+    -- if modData[playerID] == nil then return end
+    -- if modData[playerID][index] == nil then return end
+
+    -- local pointLight = modData[playerID][index]
+    -- if pointLight == nil then return end
 
     if getDebug() then
         print("Set remote active for playerID: " .. playerID)
@@ -82,7 +90,7 @@ ClientOps[Network.Commands.setRemoteActive] = function (args)
 
 end
 
-ClientOps[Network.Commands.receiveAllPointLights] = function (args)
+ClientOps[Network.Commands.receiveAll] = function (args)
     
     local player = getPlayer()
     if player == nil then return end

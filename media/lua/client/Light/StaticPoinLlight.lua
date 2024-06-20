@@ -1,8 +1,9 @@
 
 require "Light/StaticPointLight_Network"
+require "Light/StaticPointLight_Manager"
 
 StaticPointLight = StaticPointLight or {}
-StaticPointLight.modDataName = "StaticPointLight"
+-- StaticPointLight.modDataName = "StaticPointLight"
 
 --#region System
 
@@ -117,21 +118,21 @@ local function initLight(pointLight,isActive,addToCell)
     return lightSource
 end
 
-local function initModData(player, pointlight, pointlightID)
-    local playerModData = player:getModData()
-    playerModData[StaticPointLight.modDataName] = playerModData[StaticPointLight.modDataName] or {}
+-- local function initModData(player, pointlight, pointlightID)
+--     local playerModData = player:getModData()
+--     playerModData[StaticPointLight.modDataName] = playerModData[StaticPointLight.modDataName] or {}
 
-    if getDebug() then
-        print("Initializing static pointlight mod data for player: " .. player:getUsername())
-    end
+--     if getDebug() then
+--         print("Initializing static pointlight mod data for player: " .. player:getUsername())
+--     end
 
-    playerModData[StaticPointLight.modDataName][pointlightID] = pointlight
+--     playerModData[StaticPointLight.modDataName][pointlightID] = pointlight
 
-    -- Add this light to the active list
-    local modData = playerModData[StaticPointLight.modDataName]
-    modData.activeLights = modData.activeLights or {}
-    modData.activeLights[pointlightID] = pointlight
-end
+--     -- Add this light to the active list
+--     local modData = playerModData[StaticPointLight.modDataName]
+--     modData.activeLights = modData.activeLights or {}
+--     modData.activeLights[pointlightID] = pointlight
+-- end
 
 function StaticPointLight:destroy()
     
@@ -158,10 +159,10 @@ end
 function StaticPointLight:_remove()
     self:destroy()
 
-    local player = getPlayer()
-    local playerModData = player:getModData()[StaticPointLight.modDataName]
+    -- local player = getPlayer()
+    -- local playerModData = player:getModData()[StaticPointLight.modDataName]
 
-    playerModData[self.uniqueID] = nil
+    -- playerModData[self.uniqueID] = nil
 end
 
 function StaticPointLight:new(x, y, z, r, g, b , radius, uniqueID)

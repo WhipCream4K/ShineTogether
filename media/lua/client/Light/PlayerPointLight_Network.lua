@@ -1,11 +1,11 @@
 PlayerPointLight_Network = {}
 PlayerPointLight_Network.Module = "PlayerPointLight"
 PlayerPointLight_Network.Commands = {
-    createRemotePointLight = "createRemotePointLight",
-    removeRemotePointLight = "removeRemotePointLight",
+    createRemote = "createRemote",
+    removeRemote = "removeRemote",
     setRemoteActive = "setRemoteActive",
-    receiveAllPointLights = "receiveAllPointLights",
-    requestAllPointLights = "requestAllPointLights",
+    receiveAll = "receiveAll",
+    requestAll = "requestAll",
 }
 
 return PlayerPointLight_Network

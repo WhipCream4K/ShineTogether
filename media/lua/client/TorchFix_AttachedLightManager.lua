@@ -159,7 +159,6 @@ function AttachedLightManager:remotePlayerUpdate()
                 local item = remoteAttachedItems:getItemByIndex(attachedIndex)
                 if isLightItem(item) then
                     item:setActivated(lightItem.isActivated)
-                    item:setUsedDelta(1.0)
                 end
 
             end

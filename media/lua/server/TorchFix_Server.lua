@@ -5,7 +5,7 @@ if isClient() then return end
 
 
 TorchFixServer = {}
-TorchFixServer.tempData = nil
+TorchFixServer.ServerData = nil
 TorchFixServer[Network.Module] = {}
 
 local ServerOps = TorchFixServer[Network.Module]
@@ -14,19 +14,19 @@ ServerOps[Network.Commands.transmitToServer] = function(player, args)
 
     local playerID = player:getOnlineID()
 
-    local serverTempData = TorchFixServer.tempData
+    local serverTempData = TorchFixServer.ServerData
     serverTempData[playerID] = AttachedLightManager.isValid(args) and args or nil
 
 end
 
 ServerOps[Network.Commands.requestAttachedLights] = function(player, args)
-    sendServerCommand(player, Network.Module, Network.Commands.requestAttachedLights, TorchFixServer.tempData)
+    sendServerCommand(player, Network.Module, Network.Commands.requestAttachedLights, TorchFixServer.ServerData)
 end
 
 ServerOps[Network.Commands.transmitToClients] = function(player, args)
 
 
-    local serverTempData = TorchFixServer.tempData
+    local serverTempData = TorchFixServer.ServerData
     local playerID = player:getOnlineID()
     serverTempData[playerID] = AttachedLightManager.isValid(args) and args or nil
 
@@ -54,9 +54,9 @@ end
 local lpairs = pairs
 TorchFixServer.onServerStepUpdate = function ()
 
-    if TorchFixServer.tempData == nil then return end
+    if TorchFixServer.ServerData == nil then return end
 
-    local serverTempData = TorchFixServer.tempData
+    local serverTempData = TorchFixServer.ServerData
 
     for playerID, _ in lpairs(serverTempData) do
         local player = getPlayerByOnlineID(playerID)
@@ -68,7 +68,7 @@ TorchFixServer.onServerStepUpdate = function ()
 end
 
 local function onGlobalModDataLoad(isNewGame)
-    TorchFixServer.tempData = {}
+    TorchFixServer.ServerData = {}
 end
 
 Events.OnClientCommand.Add(onClientCommand)

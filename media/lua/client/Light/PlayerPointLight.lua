@@ -1,170 +1,177 @@
 require "Light/PlayerPointLight_Network"
-PlayerPointLight = PlayerPointLight or {}
-PlayerPointLight.modDataName = "PlayerPointLight"
+require "Light/PlayerPointLight_Manager"
 
+PlayerPointLight = PlayerPointLight or {}
+-- PlayerPointLight.modDataName = "PlayerPointLight"
+
+-- PlayerPointLight.Manager = {}
+-- PlayerPointLight.Manager.instances = {}
 
 --#region System
 
-local localGetSquare = getSquare
+-- local Manager = PlayerPointLight.Manager
 
-local function deferredPointLights(playerID,pointLights)
+-- local localGetSquare = getSquare
+
+-- local function deferredPointLights(playerID,pointLights)
     
-    local player = getPlayer()
-    local playerModData = player:getModData()[PlayerPointLight.modDataName]
+--     local player = getPlayer()
+--     local playerModData = player:getModData()[PlayerPointLight.modDataName]
 
-    playerModData.deferredLights = playerModData.deferredLights or {}
+--     playerModData.deferredLights = playerModData.deferredLights or {}
 
-    playerModData.deferredLights[playerID] = pointLights
+--     playerModData.deferredLights[playerID] = pointLights
 
-    for _, pointLight in pairs(pointLights) do
-        pointLight:destroy()
-    end
+--     for _, pointLight in pairs(pointLights) do
+--         pointLight:destroy()
+--     end
 
-end
+-- end
 
-local function removePointLights(pointLights)
+-- local function removePointLights(pointLights)
     
-    -- handle player disconnected
-    for _, pointLight in ipairs(pointLights) do
-        pointLight:_remove()
-    end
+--     -- handle player disconnected
+--     for _, pointLight in ipairs(pointLights) do
+--         pointLight:_remove()
+--     end
 
-end
+-- end
 
-local function activateDeferredPointLights(player)
+-- local function activateDeferredPointLights(player)
 
-    local playerModData = player:getModData()[PlayerPointLight.modDataName]
+--     local playerModData = player:getModData()[PlayerPointLight.modDataName]
 
-    local deferredLights = playerModData.deferredLights
-    if deferredLights == nil then return end
+--     local deferredLights = playerModData.deferredLights
+--     if deferredLights == nil then return end
 
-    for playerID, pointLights in pairs(deferredLights) do
+--     for playerID, pointLights in pairs(deferredLights) do
         
-        local targetPlayer = getPlayerByOnlineID(playerID)
-        if targetPlayer == nil then
-            removePointLights(pointLights)
-        else
+--         local targetPlayer = getPlayerByOnlineID(playerID)
+--         if targetPlayer == nil then
+--             removePointLights(pointLights)
+--         else
             
-            local playerX = targetPlayer:getX()
-            local playerY = targetPlayer:getY()
-            local playerZ = targetPlayer:getZ()
+--             local playerX = targetPlayer:getX()
+--             local playerY = targetPlayer:getY()
+--             local playerZ = targetPlayer:getZ()
 
-            -- check if this player is loaded in this client or not
-            local square = localGetSquare(playerX, playerY, playerZ)
-            if square ~= nil then
+--             -- check if this player is loaded in this client or not
+--             local square = localGetSquare(playerX, playerY, playerZ)
+--             if square ~= nil then
                 
-                -- reverse loop to avoid index remapping
-                for index, pointLight in pairs(pointLights) do 
-                    if playerModData[playerID] == nil or playerModData[playerID][index] == nil then
-                        deferredLights[playerID][index] = nil
-                    else
-                        pointLight:update(false)
+--                 -- reverse loop to avoid index remapping
+--                 for index, pointLight in pairs(pointLights) do 
+--                     if playerModData[playerID] == nil or playerModData[playerID][index] == nil then
+--                         deferredLights[playerID][index] = nil
+--                     else
+--                         pointLight:update(false)
 
-                        -- Add the point light to the active point lights
-                        playerModData.activeLights = playerModData.activeLights or {}
-                        playerModData.activeLights[playerID] = playerModData.activeLights[playerID] or {}
-                        playerModData.activeLights[playerID][index] = pointLight
-                    end
-                end
+--                         -- Add the point light to the active point lights
+--                         playerModData.activeLights = playerModData.activeLights or {}
+--                         playerModData.activeLights[playerID] = playerModData.activeLights[playerID] or {}
+--                         playerModData.activeLights[playerID][index] = pointLight
+--                     end
+--                 end
 
-                deferredLights[playerID] = nil
+--                 deferredLights[playerID] = nil
 
-            end
+--             end
 
-        end
+--         end
 
-    end
+--     end
 
-end
+-- end
 
-local function updateActivePointLights(player)
+-- local function updateActivePointLights(player)
     
-    local playerModData = player:getModData()[PlayerPointLight.modDataName]
+--     local playerModData = player:getModData()[PlayerPointLight.modDataName]
 
-    local activeLights = playerModData.activeLights
-    if activeLights == nil then return end
+--     local activeLights = playerModData.activeLights
+--     if activeLights == nil then return end
 
-    for playerID, pointLights in pairs(activeLights) do
+--     for playerID, pointLights in pairs(activeLights) do
 
-        local targetPlayer = getPlayerByOnlineID(playerID)
-        if targetPlayer == nil then
-            removePointLights(pointLights)
-        else
+--         local targetPlayer = getPlayerByOnlineID(playerID)
+--         if targetPlayer == nil then
+--             removePointLights(pointLights)
+--         else
 
-            local playerX = targetPlayer:getX()
-            local playerY = targetPlayer:getY()
-            local playerZ = targetPlayer:getZ()
+--             local playerX = targetPlayer:getX()
+--             local playerY = targetPlayer:getY()
+--             local playerZ = targetPlayer:getZ()
 
-            -- check if this player is loaded in this client or not
+--             -- check if this player is loaded in this client or not
 
-            local square = localGetSquare(playerX, playerY, playerZ)
-            if square ~= nil then
+--             local square = localGetSquare(playerX, playerY, playerZ)
+--             if square ~= nil then
                 
-                -- reverse loop to avoid index remapping
-                for index, pointLight in pairs(pointLights) do
-                    if playerModData[playerID] == nil or playerModData[playerID][index] == nil then
-                        activeLights[playerID][index] = nil
-                    else
-                        if pointLight:isActive() then
-                            pointLight:update(targetPlayer:isPlayerMoving())
-                        else
-                            pointLight:destroy()
-                        end
-                    end
-                end
+--                 -- reverse loop to avoid index remapping
+--                 for index, pointLight in pairs(pointLights) do
+--                     if playerModData[playerID] == nil or playerModData[playerID][index] == nil then
+--                         activeLights[playerID][index] = nil
+--                     else
+--                         if pointLight:isActive() then
+--                             pointLight:update(targetPlayer:isPlayerMoving())
+--                         else
+--                             pointLight:destroy()
+--                         end
+--                     end
+--                 end
 
-            else
+--             else
 
-                deferredPointLights(playerID,pointLights)
-                activeLights[playerID] = nil
+--                 deferredPointLights(playerID,pointLights)
+--                 activeLights[playerID] = nil
 
-            end
+--             end
 
-        end
+--         end
 
-    end
+--     end
 
-end
+-- end
 
-local function onPlayerUpdate(player)
+-- local function onPlayerUpdate(player)
     
-    if player == nil then return end
+--     if player == nil then return end
 
-    local playerModData = player:getModData()[PlayerPointLight.modDataName]
-    if playerModData == nil then return end
+--     local playerModData = player:getModData()[PlayerPointLight.modDataName]
+--     if playerModData == nil then return end
 
-    activateDeferredPointLights(player)
-    updateActivePointLights(player)
+--     activateDeferredPointLights(player)
+--     updateActivePointLights(player)
 
-end
+-- end
 
 
-local function onFadeToWorld()
+-- local function onFadeToWorld()
     
-    -- request all currently active point lights
-    local player = getPlayer()
-    sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.requestAllPointLights, {})
+--     -- request all currently active point lights
+--     local player = getPlayer()
+--     sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.requestAllPointLights, {})
 
-    Events.OnPlayerUpdate.Add(onPlayerUpdate)
-    Events.EveryOneMinute.Remove(onFadeToWorld)
+--     Events.OnPlayerUpdate.Add(onPlayerUpdate)
+--     Events.EveryOneMinute.Remove(onFadeToWorld)
 
-end
+-- end
 
-local function onPlayerSpawn(index)
+-- local function onPlayerSpawn(index)
 
-    if index == 0 then
+--     if index == 0 then
 
-        local character = getSpecificPlayer(index)
-        character:getModData()[PlayerPointLight.modDataName] = nil
-        -- create a static light for bound inspection
-        PlayerPointLight.staticLight = IsoLightSource.new(0, 0, 0, 1, 1, 1, 1, -1)
+--         local character = getSpecificPlayer(index)
+--         character:getModData()[PlayerPointLight.modDataName] = nil
+--         -- create a static light for bound inspection
+--         PlayerPointLight.staticLight = IsoLightSource.new(0, 0, 0, 1, 1, 1, 1, -1)
+--         PlayerPointLight.instances = {}
 
-        Events.EveryOneMinute.Add(onFadeToWorld)
-    end
+--         Events.EveryOneMinute.Add(onFadeToWorld)
+--     end
 
-end
+-- end
 
-Events.OnCreatePlayer.Add(onPlayerSpawn)
+-- Events.OnCreatePlayer.Add(Manager.onPlayerSpawn)
 
 --#endregion
 
@@ -194,29 +201,29 @@ local function initLight(pointLight, isActive,addToCell)
     return lightSource
 end
 
-local function initModData(pointLight, player)
+-- local function initModData(pointLight, player)
 
-    -- Ensure the modData table exists for the player
-    local modDataName = PlayerPointLight.modDataName
-    local playerModData = player:getModData()
-    playerModData[modDataName] = playerModData[modDataName] or {}
+--     -- Ensure the modData table exists for the player
+--     local modDataName = PlayerPointLight.modDataName
+--     local playerModData = player:getModData()
+--     playerModData[modDataName] = playerModData[modDataName] or {}
 
-    -- Ensure the player's online ID exists in the modData table
-    local playerOnlineID = pointLight.playerID
-    playerModData[modDataName][playerOnlineID] = playerModData[modDataName][playerOnlineID] or {}
-
-
-    -- Add the point light to the player's modData table
-    pointLight.index = #playerModData[modDataName][playerOnlineID] + 1
-    table.insert(playerModData[modDataName][playerOnlineID], pointLight)
+--     -- Ensure the player's online ID exists in the modData table
+--     local playerOnlineID = pointLight.playerID
+--     playerModData[modDataName][playerOnlineID] = playerModData[modDataName][playerOnlineID] or {}
 
 
-    -- Add the point light to the deferredLights table that needs to be activated
-    playerModData[modDataName].deferredLights = playerModData[modDataName].deferredLights or {}
-    local deferredLights = playerModData[modDataName].deferredLights
-    deferredLights[playerOnlineID] = deferredLights[playerOnlineID] or {}
-    deferredLights[playerOnlineID][pointLight.index] = pointLight
-end
+--     -- Add the point light to the player's modData table
+--     pointLight.index = #playerModData[modDataName][playerOnlineID] + 1
+--     table.insert(playerModData[modDataName][playerOnlineID], pointLight)
+
+
+--     -- Add the point light to the deferredLights table that needs to be activated
+--     playerModData[modDataName].deferredLights = playerModData[modDataName].deferredLights or {}
+--     local deferredLights = playerModData[modDataName].deferredLights
+--     deferredLights[playerOnlineID] = deferredLights[playerOnlineID] or {}
+--     deferredLights[playerOnlineID][pointLight.index] = pointLight
+-- end
 
 
 function PlayerPointLight:new(playerID,r,g,b,radius)
@@ -234,9 +241,11 @@ function PlayerPointLight:new(playerID,r,g,b,radius)
     o.isActiveCallback = nil
     o.currentActive = false
     o.isRemoteActive = false
-    o.index = 0
+    o.index = PlayerPointLight.Manager.getLightCountFromPlayerID(playerID) + 1
 
-    initModData(o,getPlayer()) -- ModData will only save at the player that is currently playing
+    PlayerPointLight.Manager.addLight(playerID,o)
+
+    -- initModData(o,getPlayer()) -- ModData will only save at the player that is currently playing
 
     return o
 
@@ -252,11 +261,7 @@ function PlayerPointLight:_remove()
     self:destroy()
 
     -- remove point light from local ModData
-    local player = getPlayer()
-
-    -- garuntee to be not nil
-    local modData = player:getModData()[PlayerPointLight.modDataName]
-    modData[self.playerID][self.index] = nil
+    PlayerPointLight.Manager.removeLight(self.playerID,self.index)
 end
 
 function PlayerPointLight:destroy()
@@ -380,7 +385,7 @@ PlayerPointLight.create = function (r,g,b,radius)
     args.radius = radius
     args.index = pointLight.index
 
-    sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.createRemotePointLight, args)
+    sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.createRemote, args)
 
     return pointLight
 end
@@ -400,7 +405,7 @@ PlayerPointLight.remove = function (pointLight)
 
     -- if the point light is not the client player's point light, send a command to the server to remove the point light
     if pointLight.playerID == player:getOnlineID() then
-        sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.removeRemotePointLight,
+        sendClientCommand(player, PlayerPointLight_Network.Module, PlayerPointLight_Network.Commands.removeRemote,
         {
             playerID = pointLight.playerID,
             index = pointLight.index

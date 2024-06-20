@@ -1,4 +1,4 @@
-require "Light/StaticPointLight"
+local Manager = require "Light/StaticPointLight_Manager"
 local Network = require "Light/StaticPointLight_Network"
 
 if not isClient() then return end
@@ -10,32 +10,41 @@ local ClientOps = StaticPointLight_Client[Network.Module]
 
 ClientOps[Network.Commands.createGlobal] = function (args)
     if args == nil then 
-        return 
+        return
     end
 
-    local player = getPlayer()
-    local playerModData = player:getModData()[StaticPointLight.modDataName]
-    if playerModData == nil then
+    if not Manager.isLightExist(args.uniqueID) then
         StaticPointLight:new(args.x, args.y, args.z, args.r, args.g, args.b, args.radius, args.uniqueID)
-    else
-        if playerModData[args.uniqueID] == nil then
-            StaticPointLight:new(args.x, args.y, args.z, args.r, args.g, args.b, args.radius, args.uniqueID)
-        end
     end
+
+    
+
+    -- local player = getPlayer()
+    -- local playerModData = player:getModData()[StaticPointLight.modDataName]
+    -- if playerModData == nil then
+    --     StaticPointLight:new(args.x, args.y, args.z, args.r, args.g, args.b, args.radius, args.uniqueID)
+    -- else
+    --     if playerModData[args.uniqueID] == nil then
+    --         StaticPointLight:new(args.x, args.y, args.z, args.r, args.g, args.b, args.radius, args.uniqueID)
+    --     end
+    -- end
 
 end
 
 ClientOps[Network.Commands.removeGlobal] = function (args)
     if args == nil then return end
 
-    local player = getPlayer()
-    local playerModData = player:getModData()[StaticPointLight.modDataName]
+    local pointlight = Manager.getLight(args.uniqueID)
+    if pointlight == nil then return end
 
-    if playerModData == nil or playerModData[args.uniqueID] == nil then
-        return
-    end
+    -- local player = getPlayer()
+    -- local playerModData = player:getModData()[StaticPointLight.modDataName]
 
-    local pointlight = playerModData[args.uniqueID]
+    -- if playerModData == nil or playerModData[args.uniqueID] == nil then
+    --     return
+    -- end
+
+    -- local pointlight = playerModData[args.uniqueID]
     pointlight:_remove()
 end
 
@@ -43,14 +52,14 @@ ClientOps[Network.Commands.receiveAll] = function (args)
     
     if args == nil then return end
 
-    local player = getPlayer()
-    local modData = player:getModData()
-    modData[StaticPointLight.modDataName] = modData[StaticPointLight.modDataName] or {}
+    -- local player = getPlayer()
+    -- local modData = player:getModData()
+    -- modData[StaticPointLight.modDataName] = modData[StaticPointLight.modDataName] or {}
 
-    modData = modData[StaticPointLight.modDataName]
+    -- modData = modData[StaticPointLight.modDataName]
 
     for uniqueID, light in pairs(args) do
-        if modData[uniqueID] == nil then
+        if not Manager.isLightExist(uniqueID) then
             StaticPointLight:new(light.x, light.y, light.z, light.r, light.g, light.b, light.radius, uniqueID)
         end
     end

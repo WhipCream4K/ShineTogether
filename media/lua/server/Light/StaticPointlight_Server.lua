@@ -70,24 +70,6 @@ ServerOps[Network.Commands.createGlobal] = function (player, args)
     return light
 end
 
--- StaticPointLight_Server.StaticPointLight.createGlobal = function (player,args)
-
---     if args == nil then return end
-
---     local serverModData = getServerModData()
---     local newUniqueID = getRandomID(serverModData)
-
---     local light = ServerPointLight:new(args.x, args.y, args.z, args.r, args.g, args.b, args.radius, newUniqueID)
-
---     serverModData[newUniqueID] = light
---     args.uniqueID = newUniqueID
-
---     sendServerCommand("StaticPointLight", "createGlobal", args)
-
---     return light
-
--- end
-
 ServerOps[Network.Commands.removeGlobal] = function (player, args)
     if args == nil then return end
 
@@ -97,32 +79,12 @@ ServerOps[Network.Commands.removeGlobal] = function (player, args)
     sendServerCommand(Network.Module, Network.Commands.removeGlobal, args)
 end
 
--- StaticPointLight_Server.StaticPointLight.removeGlobal = function (player,args)
-
---     if args == nil then return end
-
---     local serverModData = getServerModData()
---     serverModData[args.uniqueID] = nil
-    
---     sendServerCommand("StaticPointLight", "removeGlobal", {uniqueID = args.uniqueID})
-
--- end
-
 ServerOps[Network.Commands.requestAll] = function (player, args)
     local serverModData = getServerModData()
     if serverModData == nil then return end
 
     sendServerCommand(player, Network.Module, Network.Commands.receiveAll, serverModData)
 end
-
--- StaticPointLight_Server.StaticPointLight.requestAll = function (player, args)
-    
---     local serverModData = getServerModData()
---     if serverModData == nil then return end
-
---     sendServerCommand(player,"StaticPointLight", "receiveAll", serverModData)
-
--- end
 
 
 StaticPointLight = StaticPointLight or {}
