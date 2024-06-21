@@ -6,12 +6,6 @@ if isClient() then return end
 PlayerPointLight_Server = {}
 PlayerPointLight_Server.ServerData = nil
 
---#region Server ModData
-
--- local function getServerModData()
---     return ModData.get("PlayerPointLight")
--- end
-
 local function onGlobalModDataLoad(isNewGame)
     PlayerPointLight_Server.ServerData = {}
 end

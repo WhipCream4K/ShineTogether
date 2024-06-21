@@ -18,9 +18,6 @@ local function setupLightAttachment(player)
             outData[i] = {}
             local lightAttachment = outData[i]
 
-            -- lightAttachment.slotType = item:getAttachmentType()
-            -- lightAttachment.itemFullType = item:getType()
-            -- lightAttachment.battery = item:getUsedDelta()
             lightAttachment.itemID = item:getID()
             lightAttachment.isActivated = item:isActivated()
 
@@ -181,12 +178,6 @@ end
 
 
 local localPairs = pairs
-
-function AttachedLightManager:onOneMinute()
-    
-    self:remotePlayerUpdate()
-
-end
 
 function AttachedLightManager:playerUpdate(player)
     

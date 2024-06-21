@@ -3,101 +3,6 @@ require "Light/StaticPointLight_Network"
 require "Light/StaticPointLight_Manager"
 
 StaticPointLight = StaticPointLight or {}
--- StaticPointLight.modDataName = "StaticPointLight"
-
---#region System
-
--- local localGetSquare = getSquare
-
--- local function activateDeferredPointLights(player)
-
---     local playerModData = player:getModData()[StaticPointLight.modDataName]
---     local deferredLights = playerModData.deferredLights
-
---     if deferredLights == nil then return end
-
---     for uniqueID,pointlight in pairs(deferredLights) do
---         local square = localGetSquare(pointlight.x, pointlight.y, pointlight.z)
---         if playerModData[uniqueID] == nil then
---             deferredLights[uniqueID] = nil
---         elseif square ~= nil then
-
---             pointlight:setActive(true)
---             deferredLights[uniqueID] = nil
-
---             -- Add this light to the active list
---             playerModData.activeLights = playerModData.activeLights or {}
---             playerModData.activeLights[uniqueID] = pointlight
---         end
---     end
-
--- end
-
--- local function updateActiveLights(player)
-    
---     local playerModData = player:getModData()[StaticPointLight.modDataName]
---     local activeLights = playerModData.activeLights
-
---     if activeLights == nil then return end
-
---     for uniqueID,pointlight in pairs(activeLights) do
---         local square = localGetSquare(pointlight.x, pointlight.y, pointlight.z)
---         if playerModData[uniqueID] == nil then
---             activeLights[uniqueID] = nil
---         elseif square == nil then
-
---             pointlight:destroy()
---             activeLights[uniqueID] = nil
-
---             -- Add this light to the deferred list
---             playerModData.deferredLights = playerModData.deferredLights or {}
---             playerModData.deferredLights[uniqueID] = pointlight
---         end
-
---     end
-
--- end
-
--- local function onPlayerUpdate(player)
-
---     if player == nil then return end
-
---     local playerModData = player:getModData()[StaticPointLight.modDataName]
-
---     if playerModData == nil then return end
-
---     activateDeferredPointLights(player)
---     updateActiveLights(player)
--- end
-
--- local function onFadeToWorld()
-
---     local player = getPlayer()
---     sendClientCommand(player, StaticPointLight_Network.Module, StaticPointLight_Network.Commands.requestAll , {})
-
---     Events.OnPlayerUpdate.Add(onPlayerUpdate)
---     Events.EveryOneMinute.Remove(onFadeToWorld)
-
--- end
-
--- local function onPlayerSpawn(index)
-
---     if index == 0 then
-
---         -- always reset the mod data when player spawns
---         local character = getSpecificPlayer(index)
---         character:getModData()[StaticPointLight.modDataName] = nil
---         Events.EveryOneMinute.Add(onFadeToWorld)
-
---     end
-
--- end
-
--- Events.OnCreatePlayer.Add(onPlayerSpawn)
-
---#endregion
-
---#region Component
 
 local function initLight(pointLight,isActive,addToCell)
 
@@ -117,22 +22,6 @@ local function initLight(pointLight,isActive,addToCell)
 
     return lightSource
 end
-
--- local function initModData(player, pointlight, pointlightID)
---     local playerModData = player:getModData()
---     playerModData[StaticPointLight.modDataName] = playerModData[StaticPointLight.modDataName] or {}
-
---     if getDebug() then
---         print("Initializing static pointlight mod data for player: " .. player:getUsername())
---     end
-
---     playerModData[StaticPointLight.modDataName][pointlightID] = pointlight
-
---     -- Add this light to the active list
---     local modData = playerModData[StaticPointLight.modDataName]
---     modData.activeLights = modData.activeLights or {}
---     modData.activeLights[pointlightID] = pointlight
--- end
 
 function StaticPointLight:destroy()
     

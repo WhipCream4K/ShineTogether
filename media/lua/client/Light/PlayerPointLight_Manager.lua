@@ -117,6 +117,10 @@ Manager.updateActivePointLights = function ()
             
             else
 
+                for _, pointLight in pairs(lights) do
+                    pointLight:destroy()
+                end
+
                 Manager.addDeferredLights(playerID,lights)
                 Manager.removeActiveLights(playerID)
 

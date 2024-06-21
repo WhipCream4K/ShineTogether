@@ -38,15 +38,6 @@ ClientOps[Network.Commands.removeRemote] = function (args)
 
     local pointLight = Manager.getLight(playerID,index)
 
-    -- local modData = player:getModData()[PlayerPointLight.modDataName]
-    -- if modData == nil then return end
-
-    -- if modData[playerID] == nil then return end
-    -- if modData[playerID][index] == nil then return end
-
-    -- local pointLight = modData[playerID][index]
-    -- if pointLight == nil then return end
-
     if getDebug() then
         print("Remove remote point light for playerID: " .. playerID)
         print("index: " .. index)
@@ -70,15 +61,6 @@ ClientOps[Network.Commands.setRemoteActive] = function (args)
     local pointLight = Manager.getLight(playerID,index)
 
     if pointLight == nil then return end
-
-    -- local modData = player:getModData()[PlayerPointLight.modDataName]
-    -- if modData == nil then return end
-
-    -- if modData[playerID] == nil then return end
-    -- if modData[playerID][index] == nil then return end
-
-    -- local pointLight = modData[playerID][index]
-    -- if pointLight == nil then return end
 
     if getDebug() then
         print("Set remote active for playerID: " .. playerID)
